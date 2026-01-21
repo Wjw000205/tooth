@@ -1,0 +1,17 @@
+server:
+  port: 8083
+  address: 0.0.0.0   # ???????????
+spring:
+  application:
+    name: toothPlatform
+  datasource:
+    #    username: root
+    #    password: 20000515TYLtyl
+    #    url: jdbc:mysql://127.0.0.1:3306/n8n?useSSL=false
+    #    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    #    password: kdde@123
+    password: wjw000205@+..
+    #    url: jdbc:mysql://192.168.25.10:31330/noco?useSSL=false
+    url: jdbc:mysql://localhost:3306/tooth?useSSL=false&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
