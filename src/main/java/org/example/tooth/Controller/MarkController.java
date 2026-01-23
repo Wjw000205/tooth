@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.example.tooth.DTO.FinishMarkReq;
 import org.example.tooth.Service.MarkService;
 import org.example.tooth.DTO.ConfirmUploadReq;
 import org.example.tooth.DTO.PreSignUploadReq;
@@ -12,6 +13,7 @@ import org.example.tooth.DTO.PreSignUploadRespItem;
 import org.example.tooth.common.utils.R;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -57,6 +59,34 @@ public class MarkController {
         if (inserted <= 0) return R.error("入库失败");
 
         return R.ok("入库成功").put("inserted", inserted);
+    }
+
+    @Operation(summary = "根据用户ID获取需要标注的图片", description = "路径后跟上用户ID，获取当前用户需要进行标注的图片列表")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "返回图片列表",
+                    content = @Content(schema = @Schema(implementation = R.class)))
+    })
+    @GetMapping(value = "/getPictureList/{userId}")
+    public R confirmUpload(@PathVariable int userId) {
+        List<String> pictureList = markService.getMarkList(userId);
+        return R.ok("获取成功").put("pictureList", pictureList);
+    }
+
+    @Operation(summary = "提交标注结果并入库", description = "上传xml到MinIO，并更新mark表：state=2，填mark_file_name与finish_time")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "返回提交结果",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = R.class)))
+    })
+    @PostMapping(value = "/finishMark", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public R finishMark(@ModelAttribute FinishMarkReq req) {
+        if (req == null) return R.error("参数不能为空");
+        if (req.getXmlFile() == null || req.getXmlFile().isEmpty()) return R.error("xml文件不能为空");
+        if (req.getPictureId() == null) return R.error("pictureId不能为空");
+        if (req.getUserId() == null) return R.error("userId不能为空");
+
+        boolean ok = markService.finishMark(req);
+        return ok ? R.ok("提交成功") : R.error("提交失败");
     }
 }
 
