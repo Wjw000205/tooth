@@ -15,3 +15,9 @@ spring:
     #    url: jdbc:mysql://192.168.25.10:31330/noco?useSSL=false
     url: jdbc:mysql://localhost:3306/tooth?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
+  services:
+    minio:
+      endpoint: http://127.0.0.1:9000
+      access-key: admin123
+      secret-key: admin123
+      bucket: tooth

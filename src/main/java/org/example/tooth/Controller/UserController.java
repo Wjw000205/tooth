@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping
+@RequestMapping("/user")
 public class UserController {
 
     private final UserService userService;
@@ -33,7 +33,7 @@ public class UserController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = R.class)))
     })
-    @PostMapping("/user/register")
+    @PostMapping("/register")
     public R register(@Valid @RequestBody UserEntity req) {
         int ok = userService.register(req.getUserName(), req.getPassword());
 
@@ -52,7 +52,7 @@ public class UserController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = R.class)))
     })
-    @PostMapping("/user/login")
+    @PostMapping("/login")
     public R login(@Valid @RequestBody UserEntity req) {
         if (userService.login(req)) {
             return R.ok("登陆成功");
@@ -60,13 +60,18 @@ public class UserController {
         return R.error("登陆失败，请检查用户名或密码是否正确");
     }
 
+    /**
+     * 登出功能感觉没啥用啊，前端页面跳转就可以了，这边放一个接口用于后续实现
+     * @param userId
+     * @return
+     */
     @Operation(summary = "用户登出",description = "用户登出")
     @ApiResponses({
             @ApiResponse(responseCode = "0", description = "返回登出结果",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = R.class)))
     })
-    @GetMapping("/user/logout/{userId}")
+    @GetMapping("/logout/{userId}")
     public R logout(@PathVariable String userId) {
         return R.ok("登出成功");
     }

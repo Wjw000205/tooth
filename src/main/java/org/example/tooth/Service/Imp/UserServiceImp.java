@@ -65,6 +65,4 @@ public class UserServiceImp extends ServiceImpl<UserDao, UserEntity> implements 
 
         return encoder.matches(rawPassword, dbUser.getPassword());
     }
-
-
 }
