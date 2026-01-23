@@ -13,12 +13,8 @@ public class UserEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    @NotBlank(message = "name不能为空")
-    @Schema(description = "用户名", example = "alice", requiredMode = Schema.RequiredMode.REQUIRED)
     private String userName;
 
-    @NotBlank(message = "password不能为空")
-    @Schema(description = "密码", example = "123456", requiredMode = Schema.RequiredMode.REQUIRED)
     private String password;
 
     private int role;

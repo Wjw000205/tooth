@@ -2,6 +2,7 @@ package org.example.tooth.Service;
 
 import org.example.tooth.DTO.FileMeta;
 import org.example.tooth.DTO.FinishMarkReq;
+import org.example.tooth.DTO.MarkItemDTO;
 import org.example.tooth.DTO.PreSignUploadRespItem;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,7 +17,7 @@ public interface MarkService {
     int confirmUpload(List<String> objectNames, int uploader);
 
     //获取当前用户需要标注的图片的链接列表
-    List<String> getMarkList(int userId);
+    List<MarkItemDTO> getMarkList(int userId);
 
     boolean finishMark(FinishMarkReq req);
 }

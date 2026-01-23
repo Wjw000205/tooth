@@ -5,11 +5,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.example.tooth.DTO.FinishMarkReq;
+import org.example.tooth.DTO.*;
 import org.example.tooth.Service.MarkService;
-import org.example.tooth.DTO.ConfirmUploadReq;
-import org.example.tooth.DTO.PreSignUploadReq;
-import org.example.tooth.DTO.PreSignUploadRespItem;
 import org.example.tooth.common.utils.R;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +65,7 @@ public class MarkController {
     })
     @GetMapping(value = "/getPictureList/{userId}")
     public R confirmUpload(@PathVariable int userId) {
-        List<String> pictureList = markService.getMarkList(userId);
+        List<MarkItemDTO> pictureList = markService.getMarkList(userId);
         return R.ok("获取成功").put("pictureList", pictureList);
     }
 

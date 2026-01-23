@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
+import org.example.tooth.DTO.UserDTO;
 import org.example.tooth.Dao.UserDao;
 import org.example.tooth.Entity.UserEntity;
 import org.example.tooth.Service.UserService;
@@ -40,14 +41,14 @@ public class UserServiceImp extends ServiceImpl<UserDao, UserEntity> implements 
     }
 
     @Override
-    public boolean login(UserEntity req) {
-        if (req == null) return false;
+    public int login(UserDTO req) {
+        if (req == null) return 0;
 
         String username = req.getUserName();
         String rawPassword = req.getPassword();
 
-        if (username == null || username.trim().isEmpty()) return false;
-        if (rawPassword == null || rawPassword.isEmpty()) return false;
+        if (username == null || username.trim().isEmpty()) return 0;
+        if (rawPassword == null || rawPassword.isEmpty()) return 0;
 
         username = username.trim();
 
@@ -57,12 +58,13 @@ public class UserServiceImp extends ServiceImpl<UserDao, UserEntity> implements 
                         .eq(UserEntity::getUserName, username)
                         .last("limit 1")
         );
-        if (dbUser == null) return false;
+        if (dbUser == null) return 0;
 
-        // 2) BCrypt 校验：用 matches(明文, 数据库存的hash)
+        // 2) BCrypt 校验：matches(明文, hash)
         org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder =
                 new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
 
-        return encoder.matches(rawPassword, dbUser.getPassword());
+        boolean ok = encoder.matches(rawPassword, dbUser.getPassword());
+        return ok ? (dbUser.getId() == null ? 0 : dbUser.getId().intValue()) : 0;
     }
 }
