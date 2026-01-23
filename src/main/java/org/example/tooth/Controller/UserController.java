@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.Data;
+import org.example.tooth.DTO.UserDTO;
 import org.example.tooth.Entity.UserEntity;
 import org.example.tooth.Service.UserService;
 import org.example.tooth.common.utils.R;
@@ -53,9 +54,10 @@ public class UserController {
                             schema = @Schema(implementation = R.class)))
     })
     @PostMapping("/login")
-    public R login(@Valid @RequestBody UserEntity req) {
-        if (userService.login(req)) {
-            return R.ok("登陆成功");
+    public R login(@Valid @RequestBody UserDTO req) {
+        int userId = userService.login(req);
+        if (userId != 0) {
+            return R.ok("登陆成功").put("userId", userId);
         }
         return R.error("登陆失败，请检查用户名或密码是否正确");
     }

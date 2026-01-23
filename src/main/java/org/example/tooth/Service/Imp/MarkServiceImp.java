@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.minio.*;
 import org.example.tooth.DTO.FinishMarkReq;
+import org.example.tooth.DTO.MarkItemDTO;
 import org.example.tooth.Dao.MarkDao;
 import org.example.tooth.Entity.MarkEntity;
 import org.example.tooth.Service.MarkService;
@@ -115,44 +116,34 @@ public class MarkServiceImp extends ServiceImpl<MarkDao, MarkEntity> implements 
     }
 
     @Override
-    public List<String> getMarkList(int userId) {
+    public List<MarkItemDTO> getMarkList(int userId) {
         if (userId <= 0) return Collections.emptyList();
 
         List<MarkEntity> list = this.baseMapper.selectList(
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<MarkEntity>()
                         .eq(MarkEntity::getMarker, userId)
                         .eq(MarkEntity::getState, 1)
-                        .select(MarkEntity::getPictureName)
+                        .select(MarkEntity::getId, MarkEntity::getPictureName) // 关键：把id也查出来
                         .orderByAsc(MarkEntity::getDistributeTime)
         );
 
         if (list == null || list.isEmpty()) return Collections.emptyList();
 
-        List<String> res = new ArrayList<>(list.size());
-
+        List<MarkItemDTO> res = new ArrayList<>(list.size());
         for (MarkEntity m : list) {
             if (m == null) continue;
-            String objectName = m.getPictureName();
-            if (objectName == null || objectName.isBlank()) continue;
+            if (m.getId() == null) continue;
+            String name = m.getPictureName();
+            if (name == null || name.isBlank()) continue;
 
-            try {
-                String url = minioClient.getPresignedObjectUrl(
-                        GetPresignedObjectUrlArgs.builder()
-                                .method(io.minio.http.Method.GET)
-                                .bucket(BUCKET_NAME)
-                                .object(objectName)
-                                .expiry(30 * 60)   // 30分钟（秒）
-                                .build()
-                );
-                res.add(url);
-            } catch (Exception e) {
-                // 单个失败不影响整体；必要时你可以 log.warn
-                e.printStackTrace();
-            }
+            MarkItemDTO dto = new MarkItemDTO();
+            dto.setId(m.getId());
+            dto.setPictureName(name);
+            res.add(dto);
         }
-
         return res;
     }
+
 
     @Override
     public boolean finishMark(FinishMarkReq req) {
