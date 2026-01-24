@@ -12,4 +12,7 @@ public class MarkItemDTO {
 
     @Schema(description = "图片对象名（MinIO objectName）", example = "1001/xxx.jpg")
     private String pictureName;
+
+    @Schema(description = "30分钟有效的预签名访问链接（可下载）")
+    private String url;
 }
