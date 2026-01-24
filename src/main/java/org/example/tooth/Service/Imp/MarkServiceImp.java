@@ -123,26 +123,45 @@ public class MarkServiceImp extends ServiceImpl<MarkDao, MarkEntity> implements 
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<MarkEntity>()
                         .eq(MarkEntity::getMarker, userId)
                         .eq(MarkEntity::getState, 1)
-                        .select(MarkEntity::getId, MarkEntity::getPictureName) // 关键：把id也查出来
+                        .select(MarkEntity::getId, MarkEntity::getPictureName)
                         .orderByAsc(MarkEntity::getDistributeTime)
         );
 
         if (list == null || list.isEmpty()) return Collections.emptyList();
 
         List<MarkItemDTO> res = new ArrayList<>(list.size());
+
         for (MarkEntity m : list) {
-            if (m == null) continue;
-            if (m.getId() == null) continue;
-            String name = m.getPictureName();
-            if (name == null || name.isBlank()) continue;
+            if (m == null || m.getId() == null) continue;
+            String objectName = m.getPictureName();
+            if (objectName == null || objectName.isBlank()) continue;
 
             MarkItemDTO dto = new MarkItemDTO();
             dto.setId(m.getId());
-            dto.setPictureName(name);
+            dto.setPictureName(objectName);
+
+            try {
+                // 预览用：不要加 attachment
+                String url = minioClient.getPresignedObjectUrl(
+                        GetPresignedObjectUrlArgs.builder()
+                                .method(io.minio.http.Method.GET)
+                                .bucket(BUCKET_NAME)
+                                .object(objectName)
+                                .expiry(30 * 60) // 30分钟（秒）
+                                .build()
+                );
+                dto.setUrl(url);
+            } catch (Exception e) {
+                e.printStackTrace();
+                dto.setUrl(null);
+            }
+
             res.add(dto);
         }
+
         return res;
     }
+
 
 
     @Override
