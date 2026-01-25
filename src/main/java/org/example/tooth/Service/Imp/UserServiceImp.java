@@ -1,9 +1,8 @@
 package org.example.tooth.Service.Imp;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.example.tooth.DTO.UserDTO;
 import org.example.tooth.Dao.UserDao;
 import org.example.tooth.Entity.UserEntity;
@@ -11,10 +10,10 @@ import org.example.tooth.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
 public class UserServiceImp extends ServiceImpl<UserDao, UserEntity> implements UserService{
-    @Autowired
-    private UserDao userDao;
+    private final UserDao userDao;
     @Override
     public int register(String username, String password) {
         if (username == null || username.trim().isEmpty()) return 0;

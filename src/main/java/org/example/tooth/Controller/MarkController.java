@@ -78,7 +78,7 @@ public class MarkController {
     @PostMapping(value = "/finishMark", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R finishMark(@ModelAttribute FinishMarkReq req) {
         if (req == null) return R.error("参数不能为空");
-        if (req.getXmlFile() == null || req.getXmlFile().isEmpty()) return R.error("xml文件不能为空");
+        if (req.getMarkFile() == null || req.getMarkFile().isEmpty()) return R.error("xml文件不能为空");
         if (req.getPictureId() == null) return R.error("pictureId不能为空");
         if (req.getUserId() == null) return R.error("userId不能为空");
 

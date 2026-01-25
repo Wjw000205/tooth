@@ -3,6 +3,7 @@ package org.example.tooth.Service.Imp;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.minio.*;
+import lombok.RequiredArgsConstructor;
 import org.example.tooth.DTO.FinishMarkReq;
 import org.example.tooth.DTO.MarkItemDTO;
 import org.example.tooth.Dao.MarkDao;
@@ -20,16 +21,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-
+@RequiredArgsConstructor
 @Service
 public class MarkServiceImp extends ServiceImpl<MarkDao, MarkEntity> implements MarkService {
 
     private final MinioClient minioClient;
     private static final String BUCKET_NAME = "tooth";
-
-    public MarkServiceImp(MinioClient minioClient) {
-        this.minioClient = minioClient;
-    }
 
     @Override
     public List<PreSignUploadRespItem> preSignUpload(List<FileMeta> files, int uploader) {
@@ -166,9 +163,11 @@ public class MarkServiceImp extends ServiceImpl<MarkDao, MarkEntity> implements 
 
     @Override
     public boolean finishMark(FinishMarkReq req) {
-        MultipartFile xmlFile = req.getXmlFile();
+        MultipartFile file = req.getMarkFile(); // 字段名不改也能用
         int pictureId = req.getPictureId();
         int userId = req.getUserId();
+
+        if (file == null || file.isEmpty()) return false;
 
         try {
             // 1) 确保 bucket 存在
@@ -179,26 +178,35 @@ public class MarkServiceImp extends ServiceImpl<MarkDao, MarkEntity> implements 
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(BUCKET_NAME).build());
             }
 
-            // 2) 生成 objectName（建议按用户/图片分目录，且保证唯一）
-            String original = xmlFile.getOriginalFilename();
-            String suffix = ".xml";
-            if (original != null && original.toLowerCase().endsWith(".xml")) suffix = ".xml";
-            String objectName = "markxml/" + userId + "/" + pictureId + "/" + UUID.randomUUID() + suffix;
+            // 2) 生成 objectName：保留原始后缀（可为空）
+            String original = file.getOriginalFilename();
+            String suffix = "";
+            if (original != null) {
+                int dot = original.lastIndexOf('.');
+                if (dot >= 0 && dot < original.length() - 1) {
+                    suffix = original.substring(dot); // .xml/.json/.zip...
+                }
+            }
+            String objectName = "markfile/" + userId + "/" + pictureId + "/" + UUID.randomUUID() + suffix;
 
-            // 3) 上传 xml 到 MinIO
-            try (InputStream in = xmlFile.getInputStream()) {
+            // 3) 上传到 MinIO（contentType 自动获取）
+            String contentType = file.getContentType();
+            if (contentType == null || contentType.isBlank()) {
+                contentType = "application/octet-stream";
+            }
+
+            try (InputStream in = file.getInputStream()) {
                 minioClient.putObject(
                         PutObjectArgs.builder()
                                 .bucket(BUCKET_NAME)
                                 .object(objectName)
-                                .stream(in, xmlFile.getSize(), -1)
-                                .contentType("application/xml")
+                                .stream(in, file.getSize(), -1)
+                                .contentType(contentType)
                                 .build()
                 );
             }
 
             // 4) 更新 mark 表（state=2 + mark_file_name + finish_time）
-            //    建议加条件：只能完成自己的任务，且必须处于 state=1
             LocalDateTime now = LocalDateTime.now();
             int rows = this.baseMapper.update(
                     null,
@@ -213,7 +221,7 @@ public class MarkServiceImp extends ServiceImpl<MarkDao, MarkEntity> implements 
 
             if (rows == 1) return true;
 
-            // 5) DB 未更新（可能不是该用户任务/状态不对/ID不存在），可选：回滚删掉刚上传的xml，避免脏对象
+            // 5) DB 未更新：回滚删除 MinIO 对象
             try {
                 minioClient.removeObject(RemoveObjectArgs.builder()
                         .bucket(BUCKET_NAME)
@@ -228,4 +236,5 @@ public class MarkServiceImp extends ServiceImpl<MarkDao, MarkEntity> implements 
             return false;
         }
     }
+
 }

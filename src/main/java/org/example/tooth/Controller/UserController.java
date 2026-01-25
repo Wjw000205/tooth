@@ -1,21 +1,15 @@
 package org.example.tooth.Controller;
 
-import com.alibaba.fastjson2.JSONObject;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import lombok.Data;
 import org.example.tooth.DTO.UserDTO;
 import org.example.tooth.Entity.UserEntity;
 import org.example.tooth.Service.UserService;
 import org.example.tooth.common.utils.R;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

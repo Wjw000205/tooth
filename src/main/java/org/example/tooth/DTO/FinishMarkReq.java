@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class FinishMarkReq {
 
     @Schema(description = "标注xml文件", type = "string", format = "binary", requiredMode = Schema.RequiredMode.REQUIRED)
-    private MultipartFile xmlFile;
+    private MultipartFile markFile;
 
     @Schema(description = "图片记录ID（mark表主键id）", example = "12", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer pictureId;

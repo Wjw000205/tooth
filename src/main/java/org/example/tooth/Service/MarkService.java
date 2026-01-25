@@ -4,7 +4,6 @@ import org.example.tooth.DTO.FileMeta;
 import org.example.tooth.DTO.FinishMarkReq;
 import org.example.tooth.DTO.MarkItemDTO;
 import org.example.tooth.DTO.PreSignUploadRespItem;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
